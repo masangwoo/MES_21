@@ -135,7 +135,7 @@ namespace KFQS_Form
             this.grid1.ActiveRow.Cells["PLANTCODE"].Value = "1000";
             this.grid1.ActiveRow.Cells["GRPID"].Value = "SW";
             this.grid1.ActiveRow.Cells["USEFLAG"].Value = "Y";
-            this.grid1.ActiveRow.Cells["INDATE"].Value = DateTime.Now.ToString("yyyy-MM-dd");
+            this.grid1.ActiveRow.Cells["INDATE"].Value = DateTime.Now.ToString("{ 0:yyyy - MM - 01}");
 
             grid1.ActiveRow.Cells["MAKER"].Activation = Activation.NoEdit;
             grid1.ActiveRow.Cells["MAKEDATE"].Activation = Activation.NoEdit;
@@ -150,7 +150,7 @@ namespace KFQS_Form
         }
 
         public override void DoSave()
-        {
+            {
             base.DoSave();
             DataTable dtTemp = new DataTable();
             dtTemp = grid1.chkChange();
@@ -168,12 +168,7 @@ namespace KFQS_Form
 
                 foreach (DataRow drrow in dtTemp.Rows)
                 {
-                    if (Convert.ToString(drrow["WORKID"]) == string.Empty)
-                    {
-                        this.ClosePrgForm();
-                        this.ShowDialog("작업자 ID를 입력하세요.", DC00_WinForm.DialogForm.DialogType.OK);
-                    }
-
+                  
                     switch (drrow.RowState)
                     {
                         case DataRowState.Deleted:
@@ -181,10 +176,17 @@ namespace KFQS_Form
 
                             helper.ExecuteNoneQuery("10BM_WorkList_D1", CommandType.StoredProcedure
                                                        , helper.CreateParameter("PLANTCODE", Convert.ToString(drrow["PLANTCODE"]), DbType.String, ParameterDirection.Input)
-                                                       , helper.CreateParameter("WORKERID",  Convert.ToString(drrow["PLANTCODE"]), DbType.String, ParameterDirection.Input)
+                                                       , helper.CreateParameter("WORKERID",  Convert.ToString(drrow["WORKERID"]), DbType.String, ParameterDirection.Input)
                                                        );
                             break;
                         case DataRowState.Added:
+
+                            if (Convert.ToString(drrow["WORKERID"]) == string.Empty)
+                            {
+                                this.ClosePrgForm();
+                                this.ShowDialog("작업자 ID를 입력하세요.", DC00_WinForm.DialogForm.DialogType.OK);
+                                return;
+                            }
 
                             helper.ExecuteNoneQuery("10BM_WorkList_I1"
                                                     , CommandType.StoredProcedure
@@ -193,7 +195,6 @@ namespace KFQS_Form
                                                     , helper.CreateParameter("WORKERNAME", Convert.ToString(drrow["WORKERNAME"]), DbType.String, ParameterDirection.Input)
                                                     , helper.CreateParameter("GRPID",      Convert.ToString(drrow["GRPID"]),      DbType.String, ParameterDirection.Input)
                                                     , helper.CreateParameter("DEPTCODE",   Convert.ToString(drrow["DEPTCODE"]),   DbType.String, ParameterDirection.Input)
-                                                    //, helper.CreateParameter("PDALOGINFLAG", Convert.ToString(drRow["PDALOGINFLAG"]), DbType.String, ParameterDirection.Input)
                                                     , helper.CreateParameter("BANCODE",    Convert.ToString(drrow["BANCODE"]),    DbType.String, ParameterDirection.Input)
                                                     , helper.CreateParameter("USEFLAG",    Convert.ToString(drrow["USEFLAG"]),    DbType.String, ParameterDirection.Input)
                                                     , helper.CreateParameter("PHONENO",    Convert.ToString(drrow["PHONENO"]),    DbType.String, ParameterDirection.Input)
